@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <body onload="fazerLogin();">
+        <form name="form1" method="post" action="pgLogin.aspx" id="form1">
+            <input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="lnkLogin" />
+            <input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="lnkLogin" />
+            <input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="" />
+            <input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="" />
+
+            <input type="hidden" name="txtUsuario" type="text" value="27" id="txtUsuario" />
+            <input type="hidden" name="txtSenha" type="password" id="txtSenha" />
+            <select type="hidden" name="cboModoLogin" id="cboModoLogin" />
+        </form>
+
+        <script>
+		    //Modo de uso
+			//pgAutoLogin.html?usuario=(usuario)&senha=(senha)&modo=(modo)
+			//
+			//  usuario .....  N.Folha ou N.Identificador
+			//  senha .......  Senha Web cadastrada no Ponto4
+			//  modo ........  0 = N.Folha   /    1 = N.Identificador
+			//
+			//  Caso login aceito, será redirecionado para o cartão ponto do funcionario
+			//  Caso NAO aceito, ficará na pagina de login indicando o motivo do acesso negado
+			
+			
+            function getDadosView(pgLogin) {
+                var dummy = document.createElement('html');
+                dummy.innerHTML = pgLogin;
+
+                return {
+                    viewState: dummy.querySelector('#__VIEWSTATE').value,
+                    viewStateGenerator: dummy.querySelector('#__VIEWSTATEGENERATOR').value
+                };
+            }
+
+            function getDadosLogin() {
+                var params = [];
+
+                var items = window.location.search.substring(1).split("&");
+
+                for (var index = 0; index < items.length; index++) {
+                    var chave = items[index].split("=")[0];
+                    var valor = items[index].split("=")[1];
+
+                    params[chave] = valor;
+                }
+                
+                return params;
+            }
+
+            function preencheForm(dadosView, dadosLogin) {
+                document.getElementById('__VIEWSTATE').value = dadosView.viewState;
+                document.getElementById('__VIEWSTATEGENERATOR').value = dadosView.viewStateGenerator;
+                document.getElementById('txtUsuario').value = dadosLogin.usuario;
+                document.getElementById('txtSenha').value = dadosLogin.senha;
+                document.getElementById('cboModoLogin').value = dadosLogin.modo;
+            }
+
+            function submit() {
+                var theForm = document.forms['form1'];
+                if (!theForm) {
+                    theForm = document.form1;
+                }
+
+                theForm.submit();
+            }
+
+            function fazerLogin() {
+                var xhttp = new XMLHttpRequest();
+
+                xhttp.onreadystatechange = function() {
+                    var dadosView = getDadosView(xhttp.responseText);
+                    var dadosLogin = getDadosLogin();
+
+                    preencheForm(dadosView, dadosLogin);
+
+                    submit();
+                };
+
+                xhttp.open("GET", "pgLogin.aspx", true);
+
+                xhttp.send();
+            }
+        </script>
+    </body>
+</html>
